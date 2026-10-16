@@ -1,5 +1,6 @@
 const consentText = 'I’d like ORYN B launch news and marketing emails. I can unsubscribe at any time.';
 const origin = 'https://oryn-b-cinematic-review.proudcabin3.chatgpt.site';
+const launchOrigins = [origin, 'https://orynb.com', 'https://www.orynb.com'];
 const reply = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 const hash = async value => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))].map(n => n.toString(16).padStart(2, '0')).join('');
 async function readJson(request) {
@@ -11,9 +12,22 @@ async function readJson(request) {
   return JSON.parse(new TextDecoder().decode(bytes));
 }
 export async function handleSubscribe(request, env) {
-  if (!['POST', 'DELETE'].includes(request.method)) return reply({ error: 'Method not allowed' }, 405);
+  if (!['POST', 'DELETE', 'OPTIONS'].includes(request.method)) return reply({ error: 'Method not allowed' }, 405);
   const requestOrigin = request.headers.get('Origin');
-  if (![origin, new URL(request.url).origin].includes(requestOrigin)) return reply({ error: 'Request not allowed' }, 403);
+  if (![...launchOrigins, new URL(request.url).origin].includes(requestOrigin)) return reply({ error: 'Request not allowed' }, 403);
+  let response;
+  if (request.method === 'OPTIONS') {
+    const method = request.headers.get('Access-Control-Request-Method');
+    const headers = (request.headers.get('Access-Control-Request-Headers') || '').toLowerCase().split(',').map(h => h.trim()).filter(Boolean);
+    if (!['POST', 'DELETE'].includes(method) || headers.some(h => h !== 'content-type')) return reply({ error: 'Request not allowed' }, 403);
+    response = new Response(null, { status: 204, headers: { 'Access-Control-Allow-Methods': 'POST, DELETE', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Max-Age': '600' } });
+  } else response = await processSignup(request, env);
+  response.headers.set('Access-Control-Allow-Origin', requestOrigin);
+  response.headers.set('Vary', 'Origin');
+  return response;
+}
+async function processSignup(request, env) {
+  if (!['POST', 'DELETE'].includes(request.method)) return reply({ error: 'Method not allowed' }, 405);
   if (!request.headers.get('Content-Type')?.startsWith('application/json')) return reply({ error: 'JSON required' }, 415);
   if (!env?.DB) return reply({ error: 'Registration temporarily unavailable' }, 503);
   let body;

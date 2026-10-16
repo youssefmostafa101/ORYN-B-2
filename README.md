@@ -16,6 +16,8 @@ Node.js 24 and pnpm are used. Run `pnpm install --frozen-lockfile`, `pnpm build`
 
 ## Hosting and release
 
-`.openai/hosting.json` retains the existing private preview identity. The minimal Worker embeds the selected original-photo assets and serves both the page and `/api/subscribe`. D1 migrations are generated with Drizzle and included under `dist/.openai/drizzle`. There are no runtime npm dependencies. The deterministic build produces `dist/server/index.js` and hosting metadata.
+`.openai/hosting.json` retains the existing Sites identity. The user approved public launch on 17 October 2026 (Africa/Cairo). The minimal Worker embeds the selected original-photo assets and serves both the page and `/api/subscribe`. D1 migrations are generated with Drizzle and included under `dist/.openai/drizzle`. There are no runtime npm dependencies. The deterministic build produces `dist/server/index.js` and hosting metadata.
 
-The GitHub workflow tests and packages; it does not deploy or change DNS. `main`, `CNAME` and orynb.com remain untouched until the user approves replacing the live site. Final business/contact/privacy details and confirmed product facts are needed before public release. No prices, ingredient amounts, discounts or launch dates are invented.
+orynb.com stays on its existing GitHub Pages configuration (`main`, repository root). The public frontend sends signup/removal requests to the existing Sites service at https://oryn-b-cinematic-review.proudcabin3.chatgpt.site/api/subscribe. Only the approved HTTPS domain origins and same-origin requests are allowed; CORS preflights do not access the database. Keep this service public and available while collecting signups. No DNS change is needed. The GitHub quality workflow tests the source before release; merging to main triggers the existing Pages deployment.
+
+The black favicon is recolored from the supplied brand monogram, preserving its transparency and proportions. It is provided at 32 and 192 pixels plus favicon.ico. Run `node tools/make-favicon.mjs` to regenerate it. No prices, ingredient amounts, discounts or launch dates are invented.

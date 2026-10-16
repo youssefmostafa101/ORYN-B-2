@@ -1,6 +1,10 @@
 const $ = (selector, context = document) => context.querySelector(selector);
 const $$ = (selector, context = document) => [...context.querySelectorAll(selector)];
 const names = { output: 'OUTPUT', deep: 'DEEP STATE' };
+// GitHub Pages serves the public domain; the hosted service stores opt-ins.
+const signupEndpoint = ['orynb.com', 'www.orynb.com'].includes(location.hostname)
+  ? 'https://oryn-b-cinematic-review.proudcabin3.chatgpt.site/api/subscribe'
+  : '/api/subscribe';
 const heroImage = $('#hero-product');
 let heroChange = 0;
 $$('[data-hero]').forEach(button => button.addEventListener('click', async () => {
@@ -54,7 +58,7 @@ form.addEventListener('submit', async event => {
   }
   const button = $('button[type="submit"]', form); button.disabled = true; status.textContent = 'Adding you to the list…';
   try {
-    const response = await fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(12000), body: JSON.stringify({ email: email.value.trim(), consent: true, interest: form.elements.interest.value, website: form.elements.website.value, consentVersion: 'oryn-launch-v2' }) });
+    const response = await fetch(signupEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(12000), body: JSON.stringify({ email: email.value.trim(), consent: true, interest: form.elements.interest.value, website: form.elements.website.value, consentVersion: 'oryn-launch-v2' }) });
     const result = await response.json();
     if (response.status === 429) { status.textContent = 'Please wait a little before trying again.'; return; }
     if (!response.ok || result.accepted !== true) throw Error('Not saved');
@@ -68,7 +72,7 @@ $('#remove-signup').addEventListener('click', async event => {
   if (!removalToken) return;
   event.currentTarget.disabled = true;
   try {
-    const response = await fetch('/api/subscribe', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(12000), body: JSON.stringify({ token: removalToken }) });
+    const response = await fetch(signupEndpoint, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(12000), body: JSON.stringify({ token: removalToken }) });
     if (!response.ok) throw Error('Not removed');
     status.textContent = 'Your signup has been removed.'; removalToken = null; $('#remove-signup').hidden = true;
   } catch { status.textContent = 'We couldn’t remove the signup just now. Please try again.'; }
