@@ -1,171 +1,76 @@
-import { products, sanitizeCart, updateCart, validateSignup } from './lib/state.js';
-import { signupConfig } from './site-config.js';
-
-const $ = (selector, scope = document) => scope.querySelector(selector);
-const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
-const storageKey = 'oryn-b-launch-bag-v2';
-let cart = [];
-try { cart = sanitizeCart(JSON.parse(localStorage.getItem(storageKey) || '[]')); } catch { /* Private browsing still supports an in-memory bag. */ }
-const cartDialog = $('#cart');
-let previousFocus;
-function openDialog(dialog) { previousFocus = document.activeElement; dialog.showModal(); }
-function closeDialog(dialog) { dialog.close(); previousFocus?.focus({ preventScroll: true }); }
-for (const dialog of $$('dialog')) dialog.addEventListener('click', event => { if (event.target === dialog) { const rect = dialog.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeDialog(dialog); } });
-function renderCart() {
-  const count = cart.reduce((n, item) => n + item.quantity, 0);
-  $$('[data-count]').forEach(el => el.textContent = count);
-  $('#cart-items').innerHTML = cart.length ? cart.map(({ id, quantity }) => {
-    const product = products[id];
-    return `<article class="cart-item"><img src="${product.image}" class="${id === 'system' ? 'bundle-thumb' : ''}" width="95" height="115" alt="${product.name}"><div><h3>${product.name}</h3><p>${product.type}</p><p>COMING SOON</p><div class="quantity"><button data-change="-1" data-id="${id}" aria-label="Decrease ${product.name} quantity">−</button><span aria-label="Quantity">${quantity}</span><button data-change="1" data-id="${id}" aria-label="Increase ${product.name} quantity" ${quantity === 10 ? 'disabled' : ''}>+</button><button class="remove" data-remove="${id}" aria-label="Remove ${product.name}">Remove</button></div></div></article>`;
-  }).join('') : '<div class="cart-empty"><p class="eyebrow">A ROUTINE OF YOUR OWN</p><h3>Your first drop<br>starts here.</h3><p>Explore the formulas and build your launch selection.</p><a class="underlink" href="#products" data-cart-products>Explore the first drop <span>→</span></a></div>';
-  try { localStorage.setItem(storageKey, JSON.stringify(cart)); } catch { /* Storage is optional. */ }
-}
-renderCart();
-$$('[data-open-cart]').forEach(button => button.addEventListener('click', () => { closeMenu(); openDialog(cartDialog); }));
-$('[data-close-cart]').addEventListener('click', () => closeDialog(cartDialog));
-$$('[data-add]').forEach(button => button.addEventListener('click', () => { cart = updateCart(cart, button.dataset.add, 1); renderCart(); $('#announcement').textContent = `${products[button.dataset.add].name} added to your launch bag.`; openDialog(cartDialog); }));
-cartDialog.addEventListener('click', event => {
-  const change = event.target.closest('[data-change]');
-  const remove = event.target.closest('[data-remove]');
-  if (change || remove) {
-    const id = change?.dataset.id || remove.dataset.remove;
-    cart = remove ? cart.filter(item => item.id !== id) : updateCart(cart, id, Number(change.dataset.change));
-    const focusSelector = change ? `[data-id="${id}"][data-change="${change.dataset.change}"]` : null;
-    renderCart();
-    const target = focusSelector && $(focusSelector, cartDialog);
-    (target && !target.disabled ? target : $('[data-close-cart]')).focus({ preventScroll: true });
-    $('#announcement').textContent = 'Launch bag updated.';
-  }
-  if (event.target.closest('[data-cart-founders],[data-cart-products]')) closeDialog(cartDialog);
+const $ = (selector, context = document) => context.querySelector(selector);
+const $$ = (selector, context = document) => [...context.querySelectorAll(selector)];
+const names = { output: 'OUTPUT', deep: 'DEEP STATE' };
+const heroImage = $('#hero-product');
+let heroChange = 0;
+$$('[data-hero]').forEach(button => button.addEventListener('click', async () => {
+  const kind = button.dataset.hero;
+  const change = ++heroChange;
+  const next = new Image(); next.src = `assets/${kind}-1-760.webp`;
+  try { await next.decode(); } catch { return; }
+  if (change !== heroChange) return;
+  heroImage.src = next.src;
+  heroImage.alt = `Original ORYN B ${names[kind]} product mockup`;
+  $('#hero-product-name').textContent = names[kind];
+  $$('[data-hero]').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
+}));
+$('#motion-toggle').addEventListener('click', event => {
+  const paused = $('#hero-photo').classList.toggle('motion-paused');
+  event.currentTarget.setAttribute('aria-pressed', String(paused));
+  event.currentTarget.setAttribute('aria-label', `${paused ? 'Resume' : 'Pause'} gentle product motion`);
+  event.currentTarget.innerHTML = `${paused ? 'Play' : 'Pause'} <span aria-hidden="true">${paused ? '▷' : 'Ⅱ'}</span>`;
 });
-addEventListener('storage', event => { if (event.key === storageKey) { try { cart = sanitizeCart(JSON.parse(event.newValue || '[]')); renderCart(); } catch { /* Ignore invalid external storage. */ } } });
-
-const menuButton = $('.menu-button'), mobileNav = $('#mobile-nav');
-function closeMenu() { mobileNav.hidden = true; menuButton.setAttribute('aria-expanded', 'false'); menuButton.setAttribute('aria-label', 'Open navigation'); }
-menuButton.addEventListener('click', () => { const opened = mobileNav.hidden; mobileNav.hidden = !opened; menuButton.setAttribute('aria-expanded', String(opened)); menuButton.setAttribute('aria-label', opened ? 'Close navigation' : 'Open navigation'); });
-$$('a', mobileNav).forEach(a => a.addEventListener('click', closeMenu));
-document.addEventListener('keydown', event => { if (event.key === 'Escape' && !mobileNav.hidden) { closeMenu(); menuButton.focus(); } });
-matchMedia('(min-width:761px)').addEventListener('change', event => { if (event.matches) closeMenu(); });
-
-const galleryState = new Map();
-const lightbox = $('#lightbox');
-let activeGallery;
-function selectImage(gallery, index) {
-  const state = galleryState.get(gallery);
-  state.index = (index + 5) % 5;
-  const label = products[state.kind].name;
-  $('.gallery-image', gallery).src = `assets/${state.kind}-${state.index + 1}-760.webp`;
-  $('.gallery-image', gallery).alt = `${label} packaging, view ${state.index + 1} of 5`;
-  $('.gallery-counter', gallery).textContent = `0${state.index + 1} / 05`;
-  $$('button', $('.gallery-thumbs', gallery)).forEach((button, i) => button.setAttribute('aria-pressed', String(i === state.index)));
-  if (lightbox.open && activeGallery === gallery) renderLightbox();
-}
-function renderLightbox() {
-  const state = galleryState.get(activeGallery);
-  $('#lightbox-title').textContent = `${products[state.kind].name} / PRODUCT GALLERY`;
-  $('#lightbox-image').src = `assets/${state.kind}-${state.index + 1}-760.webp`;
-  $('#lightbox-image').alt = `${products[state.kind].name} packaging, view ${state.index + 1} of 5`;
-  $('[data-lightbox-counter]').textContent = `${state.index + 1} / 5`;
-}
 $$('[data-gallery]').forEach(gallery => {
   const kind = gallery.dataset.gallery;
-  galleryState.set(gallery, { kind, index: 0 });
-  for (let i = 0; i < 5; i++) {
-    const button = document.createElement('button');
-    button.type = 'button'; button.setAttribute('aria-label', `${products[kind].name} image ${i + 1}`); button.setAttribute('aria-pressed', String(i === 0));
-    button.innerHTML = `<img src="assets/${kind}-${i + 1}-160.webp" width="160" height="160" loading="lazy" alt="">`;
-    button.addEventListener('click', () => selectImage(gallery, i));
-    $('.gallery-thumbs', gallery).append(button);
+  for (let i = 1; i <= 5; i++) {
+    const button = document.createElement('button'); button.type = 'button';
+    button.setAttribute('aria-label', `${names[kind]} photo ${i}`);
+    button.setAttribute('aria-pressed', String(i === 1));
+    button.innerHTML = `<img src="assets/${kind}-${i}-160.webp" width="160" height="160" alt="" loading="lazy">`;
+    button.addEventListener('click', () => {
+      const image = $('.product-image>img', gallery);
+      image.src = `assets/${kind}-${i}-760.webp`;
+      image.alt = `Original ${names[kind]} product mockup, view ${i} of 5`;
+      $('.image-counter', gallery).textContent = `0${i} / 05`;
+      $$('button', $('.thumbnails', gallery)).forEach(b => b.setAttribute('aria-pressed', String(b === button)));
+    });
+    $('.thumbnails', gallery).append(button);
   }
-  const enlarge = () => { activeGallery = gallery; renderLightbox(); openDialog(lightbox); };
-  $('.zoom-button', gallery).addEventListener('click', enlarge);
-  $('.gallery-image', gallery).addEventListener('click', enlarge);
 });
-$('[data-close-lightbox]').addEventListener('click', () => closeDialog(lightbox));
-function moveGallery(step) { selectImage(activeGallery, galleryState.get(activeGallery).index + step); }
-$('[data-gallery-prev]').addEventListener('click', () => moveGallery(-1));
-$('[data-gallery-next]').addEventListener('click', () => moveGallery(1));
-lightbox.addEventListener('keydown', event => { if (event.key === 'ArrowLeft') moveGallery(-1); if (event.key === 'ArrowRight') moveGallery(1); });
-let touchStart;
-$('#lightbox-image').addEventListener('pointerdown', event => { touchStart = event.clientX; });
-$('#lightbox-image').addEventListener('pointerup', event => { const delta = event.clientX - touchStart; if (Math.abs(delta) > 45) moveGallery(delta < 0 ? 1 : -1); });
-
-const canvas = $('#scratch'), ctx = canvas.getContext('2d', { willReadFrequently: true });
-const invitation = $('.invitation');
-let revealed = false, scratching = false, previousPoint, scratchCount = 0;
-function revealInvitation(focus = false) {
-  if (revealed) return;
-  revealed = true; invitation.classList.add('revealed'); $('#signup-panel').hidden = false;
-  $('#reveal-invitation').hidden = true;
-  $('#announcement').textContent = 'Your founders’ invitation is revealed. Email registration is not connected in this preview.';
-  if (focus) $('#email').focus({ preventScroll: true });
-}
-$('#reveal-invitation').addEventListener('click', () => revealInvitation(true));
-function paintScratch() {
-  if (!ctx || revealed) return;
-  const rect = invitation.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
-  canvas.width = Math.round(rect.width * dpr); canvas.height = Math.round(rect.height * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'source-over';
-  const gradient = ctx.createLinearGradient(0, 0, rect.width, rect.height);
-  gradient.addColorStop(0, '#83927b'); gradient.addColorStop(.42, '#5e765b'); gradient.addColorStop(1, '#263f2c');
-  ctx.fillStyle = gradient; ctx.fillRect(0, 0, rect.width, rect.height);
-  // Deterministic brushed foil texture, independent of device rendering speed.
-  ctx.strokeStyle = '#e9e4d30b'; ctx.lineWidth = .5;
-  for (let y = 0; y < rect.height; y += 3) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(rect.width, y - 25); ctx.stroke(); }
-  scratchCount = 0;
-}
-if (ctx) {
-  new ResizeObserver(paintScratch).observe(invitation);
-  canvas.addEventListener('pointerdown', event => { scratching = true; previousPoint = null; canvas.setPointerCapture(event.pointerId); scratch(event); });
-  canvas.addEventListener('pointermove', event => { if (scratching) scratch(event); });
-  canvas.addEventListener('pointerup', () => { scratching = false; previousPoint = null; });
-  canvas.addEventListener('pointercancel', () => { scratching = false; previousPoint = null; });
-} else { canvas.hidden = true; $('.scratch-label').hidden = true; }
-function scratch(event) {
-  if (revealed) return;
-  const rect = canvas.getBoundingClientRect(), x = event.clientX - rect.left, y = event.clientY - rect.top;
-  ctx.globalCompositeOperation = 'destination-out'; ctx.strokeStyle = '#000'; ctx.lineWidth = 44; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  ctx.beginPath(); ctx.moveTo(previousPoint?.x ?? x, previousPoint?.y ?? y); ctx.lineTo(x + .1, y); ctx.stroke();
-  previousPoint = { x, y };
-  $('.scratch-label').style.opacity = '0';
-  if (++scratchCount % 12 === 0) {
-    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    let clear = 0, total = 0;
-    for (let i = 3; i < data.length; i += 64) { total++; if (data[i] < 60) clear++; }
-    if (clear / total > .32) revealInvitation();
-  }
-}
-
-const form = $('#early-access'), status = $('#form-status');
-if (signupConfig.endpoint) $('#form-note').textContent = 'Launch news and updates from ORYN B. Unsubscribe at any time.';
+const form = $('#signup'), email = $('#email'), consent = form.elements.consent, status = $('#form-status');
+let removalToken = null;
+$$('a[href="#notify"]').forEach(link => link.addEventListener('click', () => {
+  form.elements.interest.value = link.dataset.interest || 'BOTH';
+  // Keep the focus transition after the anchor has positioned the section.
+  setTimeout(() => email.focus({ preventScroll: true }), matchMedia('(prefers-reduced-motion:reduce)').matches ? 0 : 450);
+}));
 form.addEventListener('submit', async event => {
-  event.preventDefault();
-  const input = $('#email'), consent = form.elements.consent;
-  input.removeAttribute('aria-invalid'); consent.removeAttribute('aria-invalid');
-  const validation = validateSignup({ email: input.value, consent: consent.checked, website: form.elements.website.value });
-  if (!validation.valid) { status.textContent = validation.message; const target = form.elements[validation.field]; target?.setAttribute('aria-invalid', 'true'); if (validation.field !== 'website') target?.focus(); return; }
-  if (!signupConfig.endpoint) { status.textContent = 'Registration is not open in this preview. Your email has not been saved or sent.'; return; }
-  const endpoint = new URL(signupConfig.endpoint, location.href);
-  if (endpoint.origin !== location.origin || !endpoint.pathname.startsWith('/api/')) { status.textContent = 'Registration is temporarily unavailable. Please try again later.'; return; }
-  const submit = $('button[type=submit]', form); submit.disabled = true; status.textContent = 'Submitting your request…';
+  event.preventDefault(); email.removeAttribute('aria-invalid'); consent.removeAttribute('aria-invalid');
+  if (!email.value.trim() || !email.validity.valid || email.value.length > 254) {
+    status.textContent = 'Please enter a valid email address.'; email.setAttribute('aria-invalid', 'true'); email.focus(); return;
+  }
+  if (!consent.checked) {
+    status.textContent = 'Please confirm you’d like to receive ORYN B emails.'; consent.setAttribute('aria-invalid', 'true'); consent.focus(); return;
+  }
+  const button = $('button[type="submit"]', form); button.disabled = true; status.textContent = 'Adding you to the list…';
   try {
-    const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', signal: AbortSignal.timeout(12000), body: JSON.stringify({ email: validation.email, consent: true, consentVersion: signupConfig.consentVersion, source: signupConfig.source, website: '' }) });
-    if (!response.ok) throw new Error('Submission failed');
+    const response = await fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(12000), body: JSON.stringify({ email: email.value.trim(), consent: true, interest: form.elements.interest.value, website: form.elements.website.value, consentVersion: 'oryn-launch-v2' }) });
     const result = await response.json();
-    if (result.accepted !== true) throw new Error('Consent not accepted');
-    status.textContent = 'Your request is received. Check your inbox for the next step.';
-    form.reset();
-  } catch { status.textContent = 'We couldn’t submit your request. Your registration is not confirmed. Please try again.'; }
-  finally { submit.disabled = false; }
+    if (response.status === 429) { status.textContent = 'Please wait a little before trying again.'; return; }
+    if (!response.ok || result.accepted !== true) throw Error('Not saved');
+    removalToken = result.removalToken;
+    status.textContent = 'You’re on the list. We’ll let you know when the first drop is ready.';
+    $('#remove-signup').hidden = false; form.reset();
+  } catch { status.textContent = 'We couldn’t save your signup. Please try again. You haven’t been added to the list.'; }
+  finally { button.disabled = false; }
 });
-
-// Defer the entire 3D engine until the visitor approaches the motion chapters.
-let motionLoaded = false;
-const motionObserver = new IntersectionObserver(async entries => {
-  if (!entries.some(entry => entry.isIntersecting) || motionLoaded || matchMedia('(prefers-reduced-motion:reduce)').matches) return;
-  motionLoaded = true;
-  try { const { initializeMotion } = await import('./motion.js'); await initializeMotion(); }
-  catch (error) { console.warn('Cinematic scenes are using product-photo fallbacks.', error); $$('[data-stage]').forEach(stage => stage.dataset.fallback = 'true'); }
-}, { rootMargin: '700px' });
-$$('.motion-section').forEach(section => motionObserver.observe(section));
-matchMedia('(prefers-reduced-motion:reduce)').addEventListener('change', event => { if (!event.matches && !motionLoaded) { motionObserver.disconnect(); $$('.motion-section').forEach(section => motionObserver.observe(section)); } });
+$('#remove-signup').addEventListener('click', async event => {
+  if (!removalToken) return;
+  event.currentTarget.disabled = true;
+  try {
+    const response = await fetch('/api/subscribe', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(12000), body: JSON.stringify({ token: removalToken }) });
+    if (!response.ok) throw Error('Not removed');
+    status.textContent = 'Your signup has been removed.'; removalToken = null; $('#remove-signup').hidden = true;
+  } catch { status.textContent = 'We couldn’t remove the signup just now. Please try again.'; }
+  finally { $('#remove-signup').disabled = false; }
+});
