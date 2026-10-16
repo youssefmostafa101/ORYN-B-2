@@ -19,7 +19,7 @@ dialog{border:1px solid var(--line);padding:0;background:var(--black);color:var(
 @media(prefers-reduced-motion:reduce) and (min-width:761px){.motion-sticky{height:750px}}
 .system{overflow:hidden}
 .hero-products{width:43%;right:11.2%}
-@media(max-width:1100px) and (min-width:761px){.hero-products{width:47%;right:6%}}
+@media(max-width:1100px) and (min-width:761px){.hero-products{width:47%;right:6%}.hero-copy{width:40%}}
 @media(max-width:760px){.hero{height:max(100svh,870px);min-height:850px}.hero-products{width:87%;max-width:360px;right:6%;bottom:8%}}
 @media(max-width:370px){.hero{height:850px;min-height:850px}}
 [hidden]{display:none!important}
