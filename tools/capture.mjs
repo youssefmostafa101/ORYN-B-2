@@ -1,0 +1,5 @@
+import {chromium} from '@playwright/test';import {mkdir} from 'node:fs/promises';import path from 'node:path';
+const output=process.env.ORYN_QA_OUTPUT||path.resolve(import.meta.dirname,'..','test-results');await mkdir(output,{recursive:true});
+const browser=await chromium.launch({channel:process.env.BROWSER_CHANNEL||'msedge',headless:true});
+const page=await browser.newPage({viewport:{width:1440,height:960},reducedMotion:'reduce'});await page.goto('http://127.0.0.1:4173',{waitUntil:'networkidle'});await page.screenshot({path:path.join(output,'simple-desktop.png')});await page.screenshot({path:path.join(output,'simple-desktop-full.png'),fullPage:true});
+await page.setViewportSize({width:390,height:844});await page.goto('http://127.0.0.1:4173',{waitUntil:'networkidle'});await page.screenshot({path:path.join(output,'simple-mobile.png')});await page.screenshot({path:path.join(output,'simple-mobile-full.png'),fullPage:true});await browser.close();console.log('Saved desktop/mobile screenshots.');
