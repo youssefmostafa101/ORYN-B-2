@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {handleEarlyAccess} from '../server/early-access.js';
+const origin='https://preview.example';
+const body={email:'qa@example.com',consent:true,website:'',consentVersion:'founders-marketing-v1',source:'oryn-b-founders'};
+const request=(data=body,options={})=>new Request(origin+'/api/early-access',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...options},body:JSON.stringify(data)});
+const config={enabled:true,allowedOrigin:origin,rateLimit:async()=>true,subscribe:async()=>({accepted:true})};
+test('signup is disabled by default and requires trusted infrastructure',async()=>{assert.equal((await handleEarlyAccess(request())).status,503);assert.equal((await handleEarlyAccess(request(),{enabled:true,allowedOrigin:origin})).status,503);});
+test('signup rejects foreign origins, invalid consent and large payloads',async()=>{assert.equal((await handleEarlyAccess(request(body,{Origin:'https://other.example'}),config)).status,403);assert.equal((await handleEarlyAccess(request({...body,consent:false}),config)).status,422);assert.equal((await handleEarlyAccess(request({...body,consentVersion:'wrong'}),config)).status,422);assert.equal((await handleEarlyAccess(request({...body,email:'a'.repeat(5000)}),config)).status,413);});
+test('signup respects rate limit and provider failure without false success',async()=>{assert.equal((await handleEarlyAccess(request(),{...config,rateLimit:async()=>false})).status,429);assert.equal((await handleEarlyAccess(request(),{...config,subscribe:async()=>({accepted:false})})).status,502);assert.equal((await handleEarlyAccess(request(),{...config,subscribe:async()=>{throw Error('secret provider message')}})).status,502);});
+test('signup forwards exact consent copy with server timestamp only after validation',async()=>{let recorded;const response=await handleEarlyAccess(request(),{...config,now:()=>new Date('2026-10-16T12:00:00Z'),subscribe:async value=>{recorded=value;return {accepted:true};}});assert.equal(response.status,202);assert.deepEqual(await response.json(),{accepted:true});assert.equal(recorded.consent.capturedAt,'2026-10-16T12:00:00.000Z');assert.equal(recorded.email,'qa@example.com');assert.equal(recorded.consent.marketing,true);});
