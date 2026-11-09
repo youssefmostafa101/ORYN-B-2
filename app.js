@@ -61,9 +61,13 @@ form.addEventListener('submit', async event => {
     const response = await fetch(signupEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(12000), body: JSON.stringify({ email: email.value.trim(), consent: true, interest: form.elements.interest.value, website: form.elements.website.value, consentVersion: 'oryn-launch-v2' }) });
     const result = await response.json();
     if (response.status === 429) { status.textContent = 'Please wait a little before trying again.'; return; }
+    if (response.status === 409) { status.textContent = 'This address is already registered; existing contacts do not restart the welcome series.'; return; }
     if (!response.ok || result.accepted !== true) throw Error('Not saved');
     removalToken = result.removalToken;
-    status.textContent = 'You’re on the list. We’ll let you know when the first drop is ready.';
+    status.textContent = result.pendingConfirmation
+      ? 'Please check your inbox and confirm your subscription to receive launch emails.'
+      : 'You’re on the list. We’ll let you know when the first drop is ready.';
+    try { sessionStorage.setItem('orynb_launch_offer_seen_v1','1'); } catch {}
     $('#remove-signup').hidden = false; form.reset();
   } catch { status.textContent = 'We couldn’t save your signup. Please try again. You haven’t been added to the list.'; }
   finally { button.disabled = false; }
