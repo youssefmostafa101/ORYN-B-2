@@ -25,6 +25,43 @@
     <section class="section notify" id="notify" aria-labelledby="notify-title"><div class="container notify-grid"><div><p class="pill"><span class="status-dot" aria-hidden="true"></span>Coming soon</p><h2 id="notify-title">Be first<br>to know.</h2><p>Get the launch email for OUTPUT and DEEP STATE.<br>A simple heads-up when the first drop is ready.</p></div><form id="signup" class="signup" novalidate><label for="email">Your email address</label><div class="email-row"><input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" maxlength="254" required aria-describedby="form-status"><button type="submit" class="button">Notify me <span aria-hidden="true">→</span></button></div><input type="hidden" name="interest" value="BOTH"><div class="honeypot" aria-hidden="true"><label for="website">Leave this empty</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div><label class="consent"><input type="checkbox" name="consent" required><span>I’d like ORYN B launch news and marketing emails. I can unsubscribe at any time. <a href="privacy.html">Privacy policy</a></span></label><p class="form-note">No purchase. No payment details. Just the launch update.</p><p id="form-status" role="status" aria-live="polite"></p><button class="remove-signup" id="remove-signup" type="button" hidden>Changed your mind? Remove my signup</button><noscript><p class="form-note">Please enable JavaScript to use the signup form.</p></noscript></form></div></section>
     <section class="section faq" id="faq" aria-labelledby="faq-title"><div class="container faq-grid"><div><p class="eyebrow">A few questions</p><h2 id="faq-title">Straight<br>answers.</h2></div><div class="faq-list"><details><summary>Can I order yet?<span aria-hidden="true">+</span></summary><p>Not yet. The first drop is coming soon. Join the list and we’ll let you know when it’s ready.</p></details><details><summary>What am I signing up for?<span aria-hidden="true">+</span></summary><p>ORYN B launch news and marketing updates for OUTPUT and DEEP STATE. No purchase is required. You can unsubscribe at any time.</p></details><details><summary>Where can I see the product details?<span aria-hidden="true">+</span></summary><p>The galleries show our original product mockups. Final ingredients, directions, pricing and availability will be published before orders open.</p></details><details><summary>Is there a launch date?<span aria-hidden="true">+</span></summary><p>We haven’t announced one yet. The email list is where we’ll share it when it’s confirmed.</p></details></div></div></section>
   </main>
-  <footer><div class="container footer-top"><a class="brand" href="#top" aria-label="ORYN B home"><span class="brand-mark" aria-hidden="true"></span><span>ORYN B</span></a><p>Built for the work. And everything after.</p><a href="#notify">Get notified <span aria-hidden="true">↗</span></a></div><div class="container footer-bottom"><span>© 2026 ORYN B</span><div><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></div><span>The first drop / Coming soon</span></div></footer>
+  <footer><div class="container footer-top"><a class="brand" href="#top" aria-label="ORYN B home"><span class="brand-mark" aria-hidden="true"></span><span>ORYN B</span></a><p>Built for the work. And everything after.</p><a href="#notify">Get notified <span aria-hidden="true">↗</span></a></div><div class="container footer-bottom"><span>© 2026 ORYN B</span><div class="footer-links"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="https://www.instagram.com/oryn__b/" target="_blank" rel="noopener noreferrer" aria-label="ORYN B on Instagram" title="Instagram"><svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.6" cy="6.4" r="1" fill="currentColor" stroke="none"/></svg></a><a href="https://www.facebook.com/profile.php?id=61596082626687" target="_blank" rel="noopener noreferrer" aria-label="ORYN B on Facebook (profile pending verification)" title="Facebook"><svg class="social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 12.06C22 6.51 17.52 2 12 2S2 6.51 2 12.06C2 17.07 5.66 21.22 10.44 22v-7.04H7.9v-2.9h2.54V9.84c0-2.52 1.49-3.92 3.77-3.92 1.08 0 2.2.2 2.2.2v2.45h-1.24c-1.22 0-1.6.76-1.6 1.55v1.94h2.73l-.44 2.9h-2.29V22C18.34 21.22 22 17.07 22 12.06Z"/></svg></a></div><span>The first drop / Coming soon</span></div></footer>
+
+  <!-- Scratch-card concept: a deterministic reveal of the approved launch-day offer, NOT a random prize. -->
+  <div class="scratch-overlay" id="scratch-overlay" hidden>
+    <div class="scratch-dialog" role="dialog" aria-modal="true" aria-labelledby="scratch-title" tabindex="-1">
+      <button class="scratch-close" id="scratch-close" type="button" aria-label="Close launch offer popup">×</button>
+      <div class="scratch-visual"><span class="scratch-orbit scratch-orbit-one" aria-hidden="true"></span><span class="scratch-orbit scratch-orbit-two" aria-hidden="true"></span>
+        <span class="scratch-brand">ORYN B <span aria-hidden="true">✳</span> FIRST DROP</span>
+        <p class="scratch-eyebrow">THE FIRST DROP IS COMING</p>
+        <h2 id="scratch-title">A little something<br>for launch day.</h2>
+        <p class="scratch-subtitle">Scratch the card to reveal the launch offer.</p>
+        <div class="scratch-card" id="scratch-card">
+          <div class="scratch-reward" id="scratch-reward" aria-live="polite">
+            <span>REVEALED / FIRST DROP</span>
+            <strong>BUY ONE.<br>GET ONE FREE.</strong>
+            <small>ON LAUNCH DAY.</small>
+          </div>
+          <canvas id="scratch-canvas" aria-hidden="true"></canvas>
+        </div>
+        <button type="button" id="scratch-reveal" class="scratch-reveal-btn">Reveal offer without scratching</button>
+        <p class="scratch-disclosure">Everyone reveals the same offer. Eligible products and limits will be confirmed before launch.</p>
+      </div>
+      <div class="scratch-form-panel" id="scratch-form-panel" hidden>
+        <p class="scratch-form-eyebrow">GET THE REMINDER</p>
+        <h3>Be first to know<br>when we launch.</h3>
+        <p>We'll send first-drop updates to your inbox. Signing up does not reserve stock or guarantee offer eligibility.</p>
+        <form id="scratch-signup" novalidate>
+          <label for="scratch-email">Email address</label>
+          <input type="email" id="scratch-email" name="email" autocomplete="email" placeholder="you@example.com" maxlength="254" required>
+          <input type="hidden" name="interest" value="BOTH">
+          <div class="honeypot" aria-hidden="true"><label for="scratch-website">Leave this empty</label><input id="scratch-website" name="website" autocomplete="off" tabindex="-1"></div>
+          <label class="scratch-consent"><input name="consent" type="checkbox" required><span>I agree to receive ORYN B launch news and marketing emails. I can unsubscribe anytime. See our <a href="privacy.html">privacy policy</a>.</span></label>
+          <button class="button" type="submit">REMIND ME AT LAUNCH <span aria-hidden="true">→</span></button>
+          <p class="scratch-status" id="scratch-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
