@@ -11,3 +11,56 @@
 @media(max-width:360px){.container{width:calc(100% - 32px)}.hero h1{font-size:38px}.hero-actions .button{padding-inline:15px;font-size:11px}.hero-description{font-size:14px}.signup{padding:19px}.product-info{padding:21px}.product-info .button{font-size:11px}.product-info h3{font-size:28px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}.motion-button{display:none!important}}
 [hidden]{display:none!important}
+
+
+/* ORYN B launch-day scratch-card / reusable footer socials */
+.footer-links{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.footer-links a{display:inline-flex;align-items:center;justify-content:center;min-width:29px;min-height:29px}
+.footer-links .social-icon{width:20px;height:20px;transition:transform .2s,color .2s}
+.footer-links a:hover .social-icon{transform:translateY(-2px)}
+.scratch-overlay{position:fixed;z-index:90;inset:0;display:grid;place-items:center;background:rgba(5,18,12,.80);backdrop-filter:blur(8px);padding:18px;overflow-y:auto}
+.scratch-dialog{position:relative;width:min(100%,600px);margin:auto;border-radius:22px;background:var(--forest);color:#f7f3e8;box-shadow:0 28px 90px #0008;overflow:hidden;outline:none}
+.scratch-close{position:absolute;z-index:3;top:11px;right:13px;border:1px solid #ffffff44;border-radius:50%;height:38px;width:38px;background:#183325cc;color:#fff;font-size:27px;line-height:1;display:grid;place-items:center}
+.scratch-close:hover{background:#365941}
+.scratch-visual{position:relative;padding:42px 38px 28px;text-align:center;overflow:hidden;background:radial-gradient(ellipse at 55% 25%,#2b4e36 0%,#192f23 46%,#0a1b12 100%)}
+.scratch-visual>*:not(.scratch-orbit){position:relative;z-index:1}
+.scratch-orbit{position:absolute;border:1px solid rgba(217,185,119,.14);width:480px;height:480px;border-radius:50%;pointer-events:none}
+.scratch-orbit-one{top:-390px;right:-230px}.scratch-orbit-two{bottom:-380px;left:-280px}
+.scratch-brand{font-size:12px;font-weight:800;letter-spacing:.24em;color:#e9e4d3;display:block;margin-bottom:24px}
+.scratch-brand span{color:#d2b77f}
+.scratch-eyebrow,.scratch-form-eyebrow{font-size:10px;font-weight:800;letter-spacing:.23em;color:#dac28f;margin:0 0 10px}
+.scratch-visual h2{font-size:clamp(30px,6vw,45px);line-height:1.07;letter-spacing:-.05em;margin:0 0 12px}
+.scratch-subtitle{font-size:14px;color:#e6e8d8;margin:0 auto 19px;max-width:350px;line-height:1.55}
+.scratch-card{position:relative;width:min(100%,330px);height:195px;margin:0 auto 9px;border-radius:14px;overflow:hidden;isolation:isolate;box-shadow:0 11px 32px #0005;border:1px solid #e2bd74}
+.scratch-reward{display:flex;flex-direction:column;justify-content:center;gap:7px;align-items:center;width:100%;height:100%;color:#1a2e1e;background:linear-gradient(145deg,#f4e6b2,#d6ad64)}
+.scratch-reward span{font-size:9px;font-weight:800;letter-spacing:.18em}.scratch-reward strong{font-size:34px;letter-spacing:-.06em;line-height:1.05;font-weight:900}
+.scratch-reward small{font-size:12px;font-weight:800;letter-spacing:.15em}
+.scratch-card canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.scratch-reveal-btn{background:none;border:0;color:#e4d4a8;font-size:12px;text-decoration:underline;text-underline-offset:4px;min-height:33px;padding:4px 10px}
+.scratch-disclosure{font-size:10px;line-height:1.6;color:#c9d0c0;max-width:360px;margin:12px auto 0}
+.scratch-form-panel{padding:25px 38px 35px;background:#e9e4d3;color:#18291f}
+.scratch-form-panel h3{font-size:32px;margin:0 0 9px}
+.scratch-form-panel>p:not(.scratch-form-eyebrow){font-size:13px;line-height:1.6;max-width:420px;margin:0 0 20px}
+.scratch-form-panel form{display:flex;flex-direction:column;gap:10px}
+.scratch-form-panel form>label:first-child{font-size:12px;font-weight:700}
+#scratch-email{width:100%;height:50px;border:1px solid #bcb9a8;border-radius:8px;padding:0 14px;background:#fff;color:#18291f;font-size:16px}
+.scratch-consent{display:flex;align-items:start;gap:9px;font-size:11px;line-height:1.45;margin:4px 0}
+.scratch-consent input{margin-top:3px;flex:0 0 auto}
+.scratch-consent a{text-decoration:underline;text-underline-offset:2px}
+.scratch-form-panel .button{width:100%;background:#18291f;color:#fff;margin-top:5px;font-size:12px}
+.scratch-status{min-height:22px;font-size:12px;margin:1px 0 0}
+.scratch-card.scratch-revealed canvas{display:none}
+@media(max-width:700px){
+  .footer-links{gap:14px}
+  .footer-links .social-icon{width:22px;height:22px}
+  .scratch-overlay{padding:11px;align-items:start}
+  .scratch-dialog{border-radius:16px;margin:auto}
+  .scratch-visual{padding:43px 22px 19px}
+  .scratch-brand{margin-bottom:15px}
+  .scratch-visual h2{font-size:34px}
+  .scratch-card{height:174px;max-width:300px}
+  .scratch-reward strong{font-size:30px}
+  .scratch-form-panel{padding:20px 22px 25px}
+  .scratch-form-panel h3{font-size:27px}
+}
+@media(prefers-reduced-motion:reduce){.scratch-overlay,.scratch-dialog{animation:none!important}}
