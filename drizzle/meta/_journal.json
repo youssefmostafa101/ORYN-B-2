@@ -8,6 +8,13 @@
       "when": 1792180005116,
       "tag": "0000_clean_exiles",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1794200000000,
+      "tag": "0001_emailoctopus_contact",
+      "breakpoints": true
     }
   ]
 }
